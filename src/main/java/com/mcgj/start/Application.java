@@ -5,11 +5,7 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.web.support.SpringBootServletInitializer;
 import org.springframework.context.annotation.ComponentScan;
-import org.springframework.context.annotation.ImportResource;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
-
-import com.mcgj.utils.SpringUtil;
-import com.mcgj.web.websocket.WebSocketServer;
 
 /**
  * spring boot启动类

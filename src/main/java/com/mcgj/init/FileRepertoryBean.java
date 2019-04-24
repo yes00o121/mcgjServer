@@ -6,16 +6,11 @@ import java.util.Map;
 
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
-import org.springframework.stereotype.Component;
-import org.springframework.stereotype.Service;
 
 import com.mcgj.dao.FileRepertoryMapper;
 import com.mcgj.entity.FileRepertory;
 import com.mcgj.redis.RedisHashUtil;
 import com.mcgj.utils.PropertiesUtil;
-import com.mcgj.utils.SpringUtil;
 
 /**
  * 文件仓库bean

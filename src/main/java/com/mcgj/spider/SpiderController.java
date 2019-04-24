@@ -134,6 +134,8 @@ public class SpiderController extends AbstractBaseController{
 				}else{
 					conversation.setCardBanner(null);
 				}
+				conversation.setCreateUserId(1);
+				conversation.setCurrentManageUserId(1);
 				conversationMapper.insert(conversation);// 插入贴吧
 			}
 			return new ResultDTO(MessageUtil.MSG_INSERT_SUCCESS, true, conversation);
