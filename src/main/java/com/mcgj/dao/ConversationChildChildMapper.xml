@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+	
+<mapper namespace="com.mcgj.dao.ConversationChildChildMapper">
+	<!-- 根据id查询贴子数据 -->
+	<select id="selectCCCByCCId" resultType="Map">
+		select 
+			ccc.id,
+			cc.id as conversationChildId,
+			ccc.content,
+			u.user_name as userName,
+			DATE_FORMAT(ccc.create_date,'%Y-%m-%d %H:%i:%s') as createDate,
+			ccc.ISMANAGE as isManage,
+			u.photo
+		from conversation_child_child ccc 
+		LEFT JOIN conversation_child cc on cc.id = ccc.CONVERSATION_CHILD_ID
+		LEFT JOIN user u on u.id = ccc.USER_ID
+		where ccc.CONVERSATION_CHILD_ID = #{conversationChildId} and ccc.state = 1 
+		<if test="singleFloor == true">
+			and ccc.ismanage = 1
+		</if>
+	</select>
+	<!-- 新增楼层方法 -->
+	<insert id="insert" parameterType="com.mcgj.entity.ConversationChildChild">
+		insert into conversation_child_child(id,create_date,conversation_child_id,user_id,content,state,isManage,is_look)values(#{id},#{createDate},#{conversationChildId},#{userId},#{content},#{state},#{isManage},#{isLook})
+	</insert>
+	<!-- 查询用户为查看的所有回复的楼层数据 -->
+	<select id="selectConversationChildChildReplyByUserId" resultType="com.mcgj.entity.ConversationChildChild">
+		select 
+			ccc.id,
+			ccc.create_date as createDate,
+			ccc.conversation_child_id as conversationChildId,
+			ccc.user_id as userId,
+			ccc.content,
+			ccc.state,
+			ccc.ismanage,
+			ccc.is_look as isLook,
+			u.user_name as userName,
+			cc.TITLE,
+			c.CONVERSATION_NAME as conversationName
+		From conversation_child cc
+		LEFT JOIN (select *from conversation_child_child where state = 1) ccc on ccc.conversation_child_id = cc.id
+		LEFT JOIN user u on u.id = ccc.user_id
+		LEFT JOIN conversation c on c.id = cc.CONVERSATION_ID
+		where cc.USER_ID = #{userId}  and ccc.user_id != #{userId}
+		order by ccc.create_date desc
+	</select>
+	<update id="updateConversationChildChildReplyByUerId">
+		update conversation_child_child ccc
+		RIGHT JOIN (select ccc.id from conversation_child cc
+					LEFT JOIN conversation_child_child ccc on ccc.conversation_child_id = cc.id
+					where cc.user_id = #{userId} and ccc.is_look = 0) cc on cc.id = ccc.id
+		  set ccc.is_look = 1 
+	</update>
+	<!-- 查询楼层数据 -->
+	<select id="selectConversationChildChild" resultType="com.mcgj.entity.ConversationChildChild">
+		select 
+			id
+		from
+		conversation_child_child
+		<where>
+			1 = 1
+			<if test="createDate != null">
+				AND DATE_FORMAT(create_date,'%Y-%m-%d %H:%i') = DATE_FORMAT(#{createDate},'%Y-%m-%d %H:%i') 
+			</if>
+			<if test="userId != null and userId != ''">
+				AND user_id = #{userId}
+			</if>
+			<if test="conversationChildId != null and conversationChildId != ''">
+				AND conversation_child_id = #{conversationChildId}
+			</if>
+		</where>
+	</select>
+</mapper>

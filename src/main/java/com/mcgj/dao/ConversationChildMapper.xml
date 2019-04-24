@@ -1,0 +1,187 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+	
+<mapper namespace="com.mcgj.dao.ConversationChildMapper">
+	<resultMap id="BaseResultMap" type="com.mcgj.entity.ConversationChild">
+		<id column="id" property="id" jdbcType="INTEGER" />
+		<result column="conversation_id" property="conversationId" jdbcType="INTEGER" />
+		<result column="create_date" property="createDate" jdbcType="DATE" />
+		<result column="uesr_id" property="userId" jdbcType="INTEGER" />
+		<result column="title" property="title" jdbcType="VARCHAR" />
+		<result column="content" property="content" jdbcType="VARCHAR" />
+		<result column="flow" property="flow" jdbcType="INTEGER" />
+		<result column="state" property="state" jdbcType="INTEGER" />
+	</resultMap>
+	<!-- 根据id查询贴子数据 -->
+	<select id="selectConversationChildById" resultType="Map">
+		select 
+			cc.id,
+			c.id as conversationId,
+			cc.title,
+			cc.content,
+			cc.flow,
+			cc.create_date as createDate,
+			c.CONVERSATION_NAME as conversationName,
+			u.user_name as userName,
+			u.photo,
+			u.id as userId
+		from conversation_child cc
+		LEFT JOIN conversation c on c.id = cc.CONVERSATION_ID
+		LEFT JOIN user u on u.id = cc.USER_ID
+		where cc.id =#{id} and cc.state = 1 and c.state = 1
+	</select>
+	<!-- 根据贴吧id查询其下的所有帖子数据 -->
+	<select id="selectConversationChildByConversationId" parameterType="com.mcgj.entity.ConversationChild" resultType="com.mcgj.entity.ConversationChild">
+		SELECT
+			cc.id,
+			cc.CONVERSATION_ID AS conversationId,
+			cc.CREATE_DATE AS createDate,
+			cc.USER_ID AS userId,
+			cc.title,
+			cc.content,
+			cc.flow,
+			cc.state,
+			u.user_name AS createUserName,
+			ccc.user_name AS lastUserName,
+			ccc.create_date AS lastDate,
+			ccc.replyNumber,
+			u.photo
+		FROM
+			conversation_child cc
+		LEFT JOIN USER u ON u.id = cc.user_id
+		LEFT JOIN (
+			SELECT
+				*,count(ccc.id) as replyNumber
+			FROM
+				(
+					SELECT
+						ccc.id,
+						ccc.create_date,
+						ccc.conversation_child_id,
+						ccc.user_id,
+						u.user_name
+					FROM
+						conversation_child_child ccc
+					LEFT JOIN USER u ON u.id = ccc.user_id
+					ORDER BY
+						ccc.create_date DESC
+				) ccc
+			GROUP BY
+				ccc.conversation_child_id
+		) ccc ON ccc.conversation_child_id = cc.id
+		<where>
+			cc.conversation_id = #{conversationId}
+		AND cc.state = 1
+		</where>
+		order by ccc.create_date desc
+	</select>
+	<insert id="insert" parameterType="com.mcgj.entity.ConversationChild" >
+		<selectKey resultType="Integer" keyProperty="id" order="AFTER">
+			SELECT LAST_INSERT_ID()
+		</selectKey>
+		insert into conversation_child(
+			id,conversation_id,create_date,user_id,title,content,flow,state
+		)values(
+			#{id},#{conversationId},#{createDate},#{userId},#{title},#{content},#{flow},#{state}
+		)
+	</insert>
+	<select id="selectUserByconversationChildId" resultType = "com.mcgj.entity.User">
+		SELECT
+			u.id,
+			u.account,
+			u.password,
+			u.user_name AS userName,
+			u.admin,
+			u.photo,
+			u.state
+		FROM
+			conversation_child cc
+		LEFT JOIN USER u ON u.id = cc.user_id
+		WHERE
+			cc.id = #{conversationChildId}
+	</select>
+	
+	<!-- 用户收藏方法 -->
+	<insert id="addConversationChildCollection" parameterType="com.mcgj.entity.UserCollectionConversationChild">
+		insert into user_collection_conversation_child(id,create_date,conversation_child_id,user_id,state)values(#{id},#{createDate},#{conversationChildId},#{userId},#{state})
+	</insert>
+	<!-- 删除收藏贴子方法 -->
+	<delete id="deleteConversationChildCollection" parameterType="com.mcgj.entity.UserCollectionConversationChild">
+		delete from user_collection_conversation_child where user_id = #{userId} and conversation_child_id = #{conversationChildId}		
+	</delete>
+	<!-- 查询贴子收藏方法 -->
+	<select id="selectConversationChildCollection" parameterType="com.mcgj.entity.UserCollectionConversationChild" resultType="com.mcgj.entity.UserCollectionConversationChild">
+		select 
+			id,
+			user_id as userId,
+			conversation_child_id as conversationChildId,
+			create_date as createDate,
+			state
+			from 
+			user_collection_conversation_child
+			where user_id = #{userId} and conversation_child_id = #{conversationChildId}
+	</select>
+	<select id="selectCollectionConversationChildByUserId" resultType="com.mcgj.entity.ConversationChild">
+ 		select 
+			uccc.id,
+			uccc.user_id,
+			uccc.conversation_child_id as conversationChildId,
+			uccc.state,
+			cc.title,
+			ccc.create_date as createDate,
+			u.user_name as createUserName
+		From user_collection_conversation_child uccc
+		LEFT JOIN conversation_child cc on cc.id = uccc.conversation_child_id
+		LEFT JOIN (select *,max(create_date) as lastTime From conversation_child_child group by conversation_child_id ) ccc on ccc.conversation_child_id = cc.id
+		LEFT JOIN user u on u.id = ccc.user_id
+		where uccc.user_id = #{userId}
+		order by ccc.create_date desc
+ 	</select>
+ 	<select id="selectUserPublishConversationChild" parameterType="com.mcgj.entity.ConversationChild" resultType = "com.mcgj.entity.ConversationChild">
+ 		SELECT 
+			count(cc.id) as replyNumber,
+			cc.id,
+			cc.CONVERSATION_ID as conversationId,
+			cc.user_id as userId,
+			cc.title,
+			cc.create_date as createDate,
+			cc.flow,
+			cc.state
+		FROM conversation_child cc
+		LEFT JOIN conversation_child_child ccc on ccc.conversation_child_id  = cc.id
+		WHERE cc.user_id = #{userId}
+		GROUP BY CCC.CONVERSATION_CHILD_ID
+		ORDER BY CC.CREATE_DATE DESC
+ 	</select>
+ 	<!-- 根据日期查询前十条数据   -->
+ 	<select id="selectMaxConversationChildByDay" resultType = "com.mcgj.entity.ConversationChild">
+		select 
+			cc.id,
+			cc.title,
+			ccc.replyNumber
+		from conversation_child cc
+		RIGHT JOIN (select ccc.conversation_child_id,count(ccc.CONVERSATION_CHILD_ID) as replyNumber From conversation_child_child ccc
+		<where>
+			 ccc.create_date between #{startTime} and #{endTime}
+		</where>
+		group by ccc.CONVERSATION_CHILD_ID
+		order by count(ccc.CONVERSATION_CHILD_ID) desc) ccc on ccc.conversation_child_id = cc.id
+		limit 10
+	</select>
+	<!-- 查询贴子数据 -->
+	<select id="selectConversationChild" resultMap="BaseResultMap">
+		select 
+			cc.id,
+			cc.user_id,
+			cc.title,
+			cc.content
+		from conversation_child cc
+		<where>
+			1 = 1
+				AND title = #{title}
+				AND conversation_id =  #{conversationId}
+				AND user_id = #{userId}
+				AND id = #{id}
+		</where>
+	</select>
+</mapper>

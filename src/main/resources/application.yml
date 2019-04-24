@@ -1,0 +1,9 @@
+redisMap:
+        addr: 127.0.0.1
+        port: 6379
+  #auth:
+  #maxIdle: 200
+  #maxActive: 1024
+  #maxWait: 10000
+  #timeOut: 10000
+  #testOnBorrow: true

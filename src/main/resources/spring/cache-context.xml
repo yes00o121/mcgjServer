@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:p="http://www.springframework.org/schema/p" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="
+			http://www.springframework.org/schema/beans
+        	http://www.springframework.org/schema/beans/spring-beans-3.1.xsd">
+	<!-- ********************************** redis支持(名称端口号根据用途添加自定义名称)**********************************
+	<bean id="connectionFactory"
+		class="org.springframework.data.redis.connection.jedis.JedisConnectionFactory"
+		p:host-name="${REDIS_SERVER_IP1}" p:port="${REDIS_SERVER_PORT1}"
+		p:use-pool="true" p:timeout="2000" />
+
+	<bean id="redisTemplate" class="org.springframework.data.redis.core.RedisTemplate" 
+		p:connection-factory-ref="connectionFactory"/> -->
+	
+	<!-- 请自定义非Spring容器使用到的cache类 -->
+		<!-- 读取配置文件 -->
+	<bean id="configProperties" class="org.springframework.beans.factory.config.PropertiesFactoryBean">
+        <property name="locations">
+            <list>
+                <value>classpath*:application.properties</value>
+            </list>
+        </property>
+    </bean>
+    <bean id="redisUtil" class="com.mcgj.redis.JedisCacheBase" init-method="initialPool">
+    	<property name="addr"><value>${redis.addr}</value></property>
+        <property name="port"><value>${redis.port}</value></property>
+        <property name="auth"><value>${redis.auth}</value></property>
+        <property name="maxIdle"><value>${redis.maxIdle}</value></property>
+        <property name="maxActive"><value>${redis.maxActive}</value></property>
+        <property name="maxWait"><value>${redis.maxWait}</value></property>
+        <property name="timeOut"><value>${redis.timeOut}</value></property>
+        <property name="testOnBorrow"><value>${redis.testOnBorrow}</value></property>
+    </bean>
+</beans>

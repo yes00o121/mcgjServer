@@ -1,0 +1,178 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.mcgj.dao.ConversationMapper">
+	<resultMap id="BaseResultMap" type="com.mcgj.entity.Conversation">
+		<id column="id" property="id" jdbcType="INTEGER" />
+		<result column="create_user_id" property="createUserId" jdbcType="VARCHAR" />
+		<result column="create_date" property="createDate" jdbcType="DATE" />
+		<result column="conversation_name" property="conversationName" jdbcType="VARCHAR" />
+		<result column="current_manage_user_id" property="currentManageUserId" jdbcType="INTEGER" />
+		<result column="conversation_type" property="conversationType" jdbcType="INTEGER" />
+		<result column="photo" property="photo" jdbcType="VARCHAR" />
+		<result column="state" property="state" jdbcType="INTEGER" />
+		<result column="card_banner" property="cardBanner" jdbcType="VARCHAR" />
+		<result column="background" property="background" jdbcType="VARCHAR" />
+		<result column="autograph" property="autograph" jdbcType="VARCHAR" />
+	</resultMap>
+	<sql id="Base_Column_List">
+		c.id,c.create_date,c.create_user_id,c.conversation_name,c.autograph,c.current_manage_user_id,c.conversation_type,c.photo,c.state,c.card_banner,c.background
+	</sql>
+	<select id="selectNewestConversation" resultType="Map">
+		select 
+			c.id as childId,
+			c.conversation_name as conversationName,
+			cc.id as id,
+			cc.title,
+			cc.content,
+			max(ccc.create_date) as lastTime,
+			u.user_name as userName,
+			u.photo,
+			ccc.conversation_child_id,
+			count(ccc.conversation_child_id),
+			ccc.replyNumber
+		from conversation c
+		LEFT JOIN conversation_child cc on cc.conversation_id = c.id
+		RIGHT JOIN (
+				select *,count(conversation_child_id) as replyNUmber From (
+				select * From conversation_child_child
+				 order by create_date desc) ccc
+				group by ccc.conversation_child_id,ccc.conversation_child_id order by ccc.create_date desc
+			) ccc on ccc.conversation_child_id = cc.id
+			
+		LEFT JOIN user u on u.id = cc.user_id 
+		where c.state =1 and cc.state =1
+		group by ccc.id
+		order by ccc.create_date desc
+		limit 0,10
+	</select>
+	<insert id="insert" parameterType="com.mcgj.entity.Conversation">
+		<selectKey resultType="java.lang.Integer" order="AFTER" keyProperty="id">
+	          SELECT LAST_INSERT_ID()
+	    </selectKey>
+		insert into conversation(id,create_date,create_user_id,conversation_name,current_manage_user_id,conversation_type,photo,state,card_banner,autograph)values(#{id},#{createDate},#{createUserId},#{conversationName},#{currentManageUserId},#{conversationType},#{photo},#{state},#{cardBanner},#{autograph})
+	</insert>
+	<select id="selectConversation" parameterType="com.mcgj.entity.Conversation" resultMap="BaseResultMap">
+		select 
+			<include refid="Base_Column_List" />
+		from conversation c
+		<where>
+			1 = 1
+			<if test="id != null">
+				and c.id = #{id}
+			</if>
+			<if test="conversationName != null">
+				and c.conversation_name = #{conversationName}
+			</if>
+		</where>
+
+	</select>
+	<update id="update" parameterType="com.mcgj.entity.Conversation">
+		update conversation 
+			<set>
+				<if test="conversationName != null">
+					conversation_name = #{conversationName},
+				</if>
+				<if test="currentManageUserId != null">
+					current_manage_user_id =#{currentManageUserId},					
+				</if>
+				<if test="conversationType != null">
+					conversation_type = #{conversationType},
+				</if>
+				<if test="photo != null and photo != ''">
+					photo = #{photo},
+				</if>
+				<if test = "background != null and background != ''">
+					background =#{background},
+				</if>
+				<if test = "cardBanner != null and cardBanner != ''">
+					card_banner = #{cardBanner},
+				</if>
+				<if test="autograph != null">
+					autograph = #{autograph},
+				</if>
+				state = #{state}
+			</set>
+			<where>
+				id = #{id}
+			</where>
+	</update>
+	<select id = "selectConversationStatistics" parameterType="com.mcgj.entity.Conversation" resultType = "Map">
+		select 
+			c.id,
+			c.followUserNumber,
+			count(cc.id) as publishNumber
+		From (select c.*,count(ufc.id) as followUserNumber From conversation c 
+		LEFT JOIN user_follow_conversation ufc on ufc.conversation_id = c.id
+		where c.id = #{id}) as c
+		LEFT JOIN conversation_child cc on c.id = cc.conversation_id
+	</select>
+	<select id="selectMaxFollow" parameterType = "int" resultType= "com.mcgj.entity.Conversation">
+		select 
+			count(*) as number,
+			c.id,
+			c.conversation_name as conversationName,
+			c.create_date as createDate,
+			c.create_user_id as createUserId,
+			c.conversation_type as conversationType,
+			c.photo,
+			c.background,
+			c.card_banner as cardBanner,
+			c.autograph,
+			c.state
+		 From user_follow_conversation ufc 
+		LEFT JOIN conversation c on c.id = ufc.conversation_id
+		group by ufc.conversation_id
+		order by number desc 
+		limit #{limit}
+	</select>
+	<!-- 该sql存在问题,如果贴吧数量巨大，会导致返回大量的无用数据，应默认返回每个指定类型的贴吧前数条的数据足以 -->
+	<select id="selectConversationTypeAndData" resultType= "Map">
+		select  
+			c.id,
+			d.id as dictId,
+			d.dict_name as dictName,
+			c.CONVERSATION_NAME as conversationName
+		 From conversation c
+		 LEFT JOIN (select *from dict where code_value = 'conversation_type' ) d on d.dict_type = c.conversation_type
+	</select>
+	<select id="selectUserFollowConversation" parameterType= "com.mcgj.entity.User" resultType = "Map">
+		select *From (
+			select 
+					c.id as conversationId,
+					cc.id,
+					ccc.id as conversationChildChildId,
+					c.conversation_name as conversationName,
+					c.photo,
+					u.user_name as userName,
+					cc.title,
+					ccc.create_date as lastTime,
+					cc.content
+			from conversation c 
+		RIGHT JOIN (
+			select *from user_follow_conversation 
+			<where>
+				 user_id = #{id}
+			</where>
+		) ufc on ufc.conversation_id = c.id	
+		LEFT JOIN conversation_child cc on cc.conversation_id = c.id
+		LEFT JOIN user u on u.id = cc.user_id
+		LEFT JOIN conversation_child_child ccc on ccc.conversation_child_id = cc.id
+		order by ccc.create_date desc
+		) cc
+		where cc.id is not null
+		group by cc.id
+		order by cc.lastTime desc
+		limit 20
+	</select>
+	<select id="selectConversationMaster" parameterType="com.mcgj.entity.Conversation" resultType = "Map">
+		select 
+			c.id,
+			u.user_name as userName,
+			u.photo,
+			d.dict_name as dictName
+		from conversation c
+		LEFT JOIN user u on u.id = c.CURRENT_MANAGE_USER_ID
+		LEFT JOIN dict d on d.dict_type = c.conversation_type
+		where c.id = #{id}
+	</select>
+</mapper>

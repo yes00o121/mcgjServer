@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.mcgj.dao.UserMapper">
+	<resultMap id="BaseResultMap" type="com.mcgj.entity.User">
+		<id column="id" property="id" jdbcType="INTEGER" />
+		<result column="account" property="account" jdbcType="VARCHAR" />
+		<result column="user_name" property="userName" jdbcType="VARCHAR" />
+		<result column="password" property="password" jdbcType="VARCHAR" />
+		<result column="admin" property="admin" jdbcType="INTEGER" />
+		<result column="create_date" property="createDate" jdbcType="DATE" />
+		<result column="modify_date" property="modifyDate" jdbcType="DATE" />
+		<result column="photo" property="photo" jdbcType="VARCHAR" />
+		<result column="background" property="background" jdbcType="VARCHAR" />
+		<result column="card" property="card" jdbcType="VARCHAR" />
+		<result column="state" property="state" jdbcType="INTEGER" />
+	</resultMap>
+	<sql id="Base_Column_List">
+		id,account,user_name,password,state,photo,create_date,modify_date,admin
+	</sql>
+ 	<select id="login" resultType="com.mcgj.entity.User" resultMap="BaseResultMap">
+ 		select 
+ 			<include refid="Base_Column_List" />
+ 		from user where account = #{account} and  password=#{password}
+ 	</select>
+ 	<insert id="insert" parameterType="com.mcgj.entity.User">
+ 		<selectKey resultType="Integer" keyProperty="id" order="AFTER">
+			SELECT LAST_INSERT_ID()
+		</selectKey>
+ 		insert into user(id,account,password,user_name,admin,create_date,photo,state)values(#{id},#{account},#{password},#{userName},#{admin},#{createDate},#{photo},#{state})
+ 	</insert>
+ 	<select id="findUserByAccount" resultMap="BaseResultMap">
+ 		select 
+ 			<include refid="Base_Column_List" />
+ 		from user where account=#{account}
+ 	</select>
+ 	<select id="selectUserUnreadMessageCountByUserId" resultType="int">
+		select 
+			count(ccc.id) as replyNumber
+		from conversation_child cc
+		LEFT JOIN conversation_child_child ccc on ccc.CONVERSATION_CHILD_ID = cc.id
+		where cc.user_id = #{userId} and cc.state = 1 and ccc.is_look = 0 and ccc.USER_ID != #{userId}
+ 	</select>
+ 	
+ 	<insert id="insertLoginLog">
+ 		insert into login_log(id,login_date,login_ip,user_id,os,browser)values(#{id},#{createDate},#{loginIp},#{userId},#{os},#{browser})
+ 	</insert>
+ 	<select id="selectIsExists" resultType="int">
+ 		select id From user  where  user_name =#{userName}
+ 	</select>
+</mapper>

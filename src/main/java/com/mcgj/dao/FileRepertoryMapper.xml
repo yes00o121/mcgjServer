@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.mcgj.dao.FileRepertoryMapper">
+	<resultMap id="BaseResultMap" type="com.mcgj.entity.FileRepertory">
+		<id column="id" property="id" jdbcType="INTEGER" />
+		<result column="source" property="source" jdbcType="VARCHAR" />
+		<result column="address" property="address" jdbcType="VARCHAR" />
+		<result column="create_date" property="createDate" jdbcType="DATE" />
+		<result column="mongodbId" property="mongodbId" jdbcType="VARCHAR" />
+	</resultMap>
+	<sql id="Base_Column_List">
+		id,source,address,create_date,mongodbId
+	</sql>
+ 	<select id="selectAll" resultMap="BaseResultMap">
+ 		select 
+ 			<include refid="Base_Column_List" />
+ 		from file_repertory
+ 	</select>
+ 	<select id="insert" parameterType="com.mcgj.entity.FileRepertory">
+ 		INSERT INTO file_repertory(id,source,address,create_date,mongodbId)VALUES(#{id},#{source},#{address},#{createDate},#{mongodbId})
+ 	</select>
+</mapper>

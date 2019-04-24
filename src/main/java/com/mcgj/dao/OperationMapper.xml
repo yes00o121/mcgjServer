@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.mcgj.dao.OperationMapper">
+	<resultMap id="BaseResultMap" type="com.mcgj.entity.Operation">
+		<id column="id" property="id" jdbcType="INTEGER" />
+		<result column="ip" property="ip" jdbcType="VARCHAR" />
+		<result column="create_date" property="createDate" jdbcType="DATE" />
+		<result column="params" property="params" jdbcType="VARCHAR" />
+		<result column="user_id" property="userId" jdbcType="INTEGER" />
+		<result column="method" property="method" jdbcType="VARCHAR" />
+		<result column="operation" property="operation" jdbcType="VARCHAR" />
+	</resultMap>
+	<sql id="Base_Column_List">
+		id,create_date,params,user_id,ip,mthod,operation
+	</sql>
+ 	
+ 	<insert id="insert" parameterType="com.mcgj.entity.Operation">
+ 		INSERT INTO OPERATION_LOG(create_date,params,user_id,ip,method,operation)VALUES(#{createDate},#{params},#{userId},#{ip},#{method},#{operation})
+ 	</insert>
+</mapper>
