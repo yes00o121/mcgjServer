@@ -10,6 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import com.mcgj.dao.FileRepertoryMapper;
 import com.mcgj.entity.FileRepertory;
 import com.mcgj.redis.RedisHashUtil;
+import com.mcgj.utils.ConstantUtil;
 import com.mcgj.utils.PropertiesUtil;
 
 /**
@@ -34,7 +35,7 @@ public class FileRepertoryBean {
 			for(FileRepertory file:list){
 				tempMap.put(file.getAddress(), file.getMongodbId());
 			}
-			RedisHashUtil.putAll(PropertiesUtil.get("redisConifg.properties","fileRepertory" ), tempMap);
+			RedisHashUtil.putAll(ConstantUtil.FILE_REPERTORY_KEY, tempMap);
 			System.out.println("初始化文件仓库到redis...");
 		}
 	}

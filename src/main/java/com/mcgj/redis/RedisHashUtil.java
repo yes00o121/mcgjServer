@@ -19,8 +19,8 @@ import redis.clients.jedis.Jedis;
 
 /**
  * redis hash工具类
- * @author ad
- *
+ * @author 杨晨
+ * 
  */
 @Service
 public class RedisHashUtil extends JedisCacheBase2{
@@ -137,7 +137,7 @@ public class RedisHashUtil extends JedisCacheBase2{
 	        }
 	    }
 	    /**
-	     * 根据Key获取值
+	     * 根据Key获取值,字符串数据
 	     * @param key
 	     * @return
 	     */
@@ -201,6 +201,12 @@ public class RedisHashUtil extends JedisCacheBase2{
 	        return exist;
 	    }
 
+	    /**
+	     * 获取hash数据
+	     * @param key
+	     * @param id 数据Key
+	     * @return
+	     */
 	    public static Object get(String key, String id) {
 	        String bulk = null;
 	        Jedis jedis = getConn();

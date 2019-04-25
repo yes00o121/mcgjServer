@@ -85,7 +85,13 @@ public class MessageUtil implements Serializable{
 	
 	public static final String MSG_GET_FILEINPUTSTREAM_ERROR = "获取文件流失败";
 	
+	public static final String MSG_GET_FILEINPUTSTREAM_IS_ZERO = "获取的文件流为0";
+	
 	public static final String MSG_UPLOAD_FILE_ERROR = "上传文件异常";
 	
 	public static final String MSG_CLOSE_STREAM_ERROR = "关闭文件流异常";
+	
+	public static final String MSG_REQUEST_URL_IS_NULL = "请求的url为空";
+	
+	public static final String MSG_URL_NOT_HTTP = "请求url不是http开头";
 }

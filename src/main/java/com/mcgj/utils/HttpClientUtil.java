@@ -12,6 +12,10 @@ import java.net.URLConnection;
 
 import org.apache.log4j.Logger;
 
+import com.mcgj.redis.RedisHashUtil;
+
+import redis.clients.jedis.Jedis;
+
 
 public class HttpClientUtil {
 	
@@ -126,21 +130,46 @@ public class HttpClientUtil {
     	HttpURLConnection conn = null;
     	try {
     		url = url.startsWith("//") ? url.replaceAll("//", "http://") : url;
-    		url = url.startsWith("http://") ? url : url.replaceAll(url, "http://" + url);
-    		URL realUrl = new URL(url);
+    		url = url.startsWith("http") ? url : url.replaceAll(url, "http://" + url);
+    		URL realUrl = new URL(new String(url.getBytes(),"UTF-8"));
     		conn = (HttpURLConnection) realUrl.openConnection();
         	if(conn.getResponseCode() == 200){
-        		return conn.getInputStream();
+        		InputStream inputStream = conn.getInputStream();//获取输入流
+        		if(inputStream != null && inputStream.available() > 0){
+        			return inputStream;
+        		}
+        		throw new RuntimeException(MessageUtil.MSG_GET_FILEINPUTSTREAM_IS_ZERO);
         	}else{
         		log.error(MessageUtil.MSG_GET_FILEINPUTSTREAM_ERROR+ ":"+conn.getResponseCode());
         		throw new RuntimeException(MessageUtil.MSG_GET_FILEINPUTSTREAM_ERROR);
         	}
 		} catch (Exception e) {
 			log.error(e);
-		}finally {
+		}/*finally {
 			conn.disconnect();
-		}
+		}*/
     	return null;
+    }
+    
+    /**
+     * 判断数据是否是http开头
+     * @param url
+     */
+    public static Boolean isHttp(String url){
+    	if(url != null && url.startsWith("http")){
+    		return true;
+    	}
+    	return false;
+    }
+    
+    /**
+     * 补充没有http开头的地址
+     * @param url
+     */
+    public static String perfectHttp(String url){
+    	url = url.startsWith("//") ? url.replaceAll("//", "http://") : url;
+		url = url.startsWith("http") ? url : url.replaceAll(url, "http://" + url);
+		return url;
     }
     
     /**
@@ -158,15 +187,4 @@ public class HttpClientUtil {
     	return null;
     }
     
-    public static void main(String[] args) {
-		String url = "http://tb1.bdstatic.com/tb/cms/frs/bg/default_head20141014.jpg";
-		try {
-			URL ul = new URL(url);
-			System.out.println(ul.getHost());
-		} catch (MalformedURLException e) {
-			e.printStackTrace();
-		}
-		System.out.println();
-//		getFileInputStream(url);
-	}
 }
