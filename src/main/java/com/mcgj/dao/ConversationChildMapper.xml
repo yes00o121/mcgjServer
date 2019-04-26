@@ -178,10 +178,18 @@
 		from conversation_child cc
 		<where>
 			1 = 1
+			<if test = "title != null and title != ''">
 				AND title = #{title}
+			</if>
+			<if test = "conversationId != null and conversationId != ''">
 				AND conversation_id =  #{conversationId}
+			</if>
+			<if test = "userId != null and userId != ''">
 				AND user_id = #{userId}
+			</if>
+			<if test = "id != null and id != ''">
 				AND id = #{id}
+			</if>	
 		</where>
 	</select>
 </mapper>

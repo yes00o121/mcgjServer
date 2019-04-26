@@ -60,10 +60,9 @@ public class UserController extends AbstractBaseController {
 
 	/**
 	 * 用户注册方法
-	 * 
 	 * @return
 	 */
-	@RequestMapping("/register")
+	@RequestMapping(value = "/register",method = RequestMethod.POST)
 	@ResponseBody
 	public ResultDTO register(HttpServletRequest request,
 			HttpServletResponse response, User user) {
@@ -136,23 +135,6 @@ public class UserController extends AbstractBaseController {
 			result.setSuccess(false);
 			result.setMessage(e.getMessage());
 			return result;
-		}
-	}
-
-	/**
-	 * 爬虫****
-	 * 判断用户是否存在，不存在进行创建，然后返回用户信息
-	 * @return
-	 */
-	@RequestMapping("/selectIsExists")
-	@ResponseBody
-	public Integer selectIsExists(String userName,String photo){
-		try {
-			Integer selectIsExists = userService.selectIsExists(userName, photo);
-			return selectIsExists;
-		} catch (Exception e) {
-			e.printStackTrace();
-			return 1;
 		}
 	}
 }

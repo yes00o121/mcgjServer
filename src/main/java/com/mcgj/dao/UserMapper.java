@@ -39,11 +39,10 @@ public interface UserMapper extends BaseService<User,Integer>{
 	void insertLoginLog(loginLog loginLog);
 	
 	/**
-	 * 爬虫****
-	 * 判断用户是否存在，不存在进行创建，然后返回用户信息
+	 * 根据用户名称查询用户id
 	 * @param userName
 	 * @return
 	 */
-	Integer selectIsExists(@Param("userName")String userName);
+	Integer selectUserIdByName(@Param("userName")String userName);
 	
 }

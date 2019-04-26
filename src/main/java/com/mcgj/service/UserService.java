@@ -178,23 +178,9 @@ public class UserService implements IUserService{
 		
 		return conversationChildMapper.selectCollectionConversationChildByUserId(userId);
 	}
-	/**
-	 * 爬虫****
-	 * 判断用户是否存在，不存在进行创建，然后返回用户信息
-	 */
-	public Integer selectIsExists(String userName,String photo) {
-		Integer selectIsExists = userMapper.selectIsExists(userName);
-		if(selectIsExists != null){
-			return selectIsExists;
-		}
-		//用户不存在，进行数据插入
-		User record = new User();
-		record.setUserName(userName);
-		record.setPhoto(photo);
-		record.setAccount(userName);
-		record.setPassword("e10adc3949ba59abbe56e057f20f883e");//默认123456
-		record.setAdmin(false);
-		userMapper.insert(record);
-		return record.getId();
+
+	@Override
+	public Integer selectUserIdByName(String userName) {
+		return userMapper.selectUserIdByName(userName);
 	}
 }	

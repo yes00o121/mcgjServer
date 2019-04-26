@@ -41,10 +41,9 @@ public interface IUserService extends BaseService<User,Integer>{
 	List<ConversationChild> selectCollectionConversationChildByUserId(Integer userId);
 	
 	/**
-	 * 爬虫****
-	 * 判断用户是否存在，不存在进行创建，然后返回用户信息
+	 * 根据用户名称查询用户id
 	 * @param userName
 	 * @return
 	 */
-	public Integer selectIsExists(String userName,String photo);
+	public Integer selectUserIdByName(String userName);
 }
