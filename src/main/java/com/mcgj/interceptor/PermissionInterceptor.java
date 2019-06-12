@@ -51,13 +51,19 @@ public class PermissionInterceptor implements HandlerInterceptor {
 			return true;
 		} else if ("/user/register".equals(url)) {// 注册接口
 			return true;
-		} else if ("/common/uploadFile".equals(url)) {// 上传文件接口
+		}/* else if ("/common/uploadFile".equals(url)) {// 上传文件接口
 			return true;
 		} else if ("/common/image".equals(url)) {// 查询图片接口
 			return true;
 		} else if ("/common/generateVerification".equals(url)) {// 验证码接口
 			return true;
 		}else if ("/common/upNetWorkImg".equals(url)) {// 上传网络图片
+			return true;
+		}*/
+		//common下的请求不拦截
+		else if(url.startsWith("/common/")){
+			return true;
+		}else if("/systemConfig/updateSystemConfigCache".equals(url)){//刷新配置缓存
 			return true;
 		}
 		//如果参数中的爬虫key和配置中的一致,给予通过

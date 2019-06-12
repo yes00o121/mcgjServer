@@ -3,10 +3,17 @@ package com.mcgj.utils;
 import java.awt.Color;
 import java.awt.Font;
 import java.awt.Graphics;
+import java.awt.Image;
 import java.awt.image.BufferedImage;
+import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.Random;
+
+import javax.imageio.ImageIO;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * 随机绘制图形
@@ -14,6 +21,8 @@ import java.util.Random;
  *
  */
 public class RandomGraphic {
+	
+	private static Logger log = LoggerFactory.getLogger(RandomGraphic.class);
 	
 	private int workHeight =10;//字符的高度
 	
@@ -69,11 +78,69 @@ public class RandomGraphic {
 	        int b = fc + random.nextInt(bc - fc);
 	        return new Color(r, g, b);
 	}
-	public static void main(String[] args) throws FileNotFoundException, IOException {
-		RandomGraphic a = new RandomGraphic();
-		a.createGraphic(a.getRandomCharacter());
-//		System.out.println(a.getRandomCharacter());
-//		System.out.println((int)(Math.random()*100));
+	
+	/**
+	 * 在制定文件夹下随机获取一张图片写入制定文本内容
+	 * @param content 内容
+	 * @param filePath 文件路径
+	 * @param width 宽度
+	 * @param height 高度
+	 */
+	public BufferedImage createWrodImage(String content,String filePath){
+		try {
+//			String filePath = "D:\\mcgj\\myProject\\mcgjServer\\src\\main\\webapp\\resources\\home\\card_banner";
+			File file = new File(filePath);
+			if(!file.exists()){
+				throw new RuntimeException("横幅文件夹不存在");
+			}
+			//横幅图片数量
+			int imgCount = file.list().length;
+			if(file.list().length == 0){
+				throw new RuntimeException("横幅文件夹下没有图片");
+			}
+			int random = new Random().nextInt(imgCount);//随机一张图片
+			String imgName = file.list()[random];
+			file = new File(filePath + "\\" + imgName);
+			BufferedImage readImage = ImageIO.read(file);//读取文件流
+			BufferedImage bufferImage = new BufferedImage(readImage.getWidth(null), readImage.getHeight(null), BufferedImage.TYPE_INT_RGB);
+			Graphics graphics = bufferImage.getGraphics();//获取画笔
+			graphics.drawImage(readImage.getScaledInstance(readImage.getWidth(null), readImage.getHeight(null),Image.SCALE_SMOOTH),0,0,null);
+			graphics.setColor(Color.RED);
+			graphics.setFont(new Font("微软雅黑",Font.ROMAN_BASELINE,64));
+			graphics.drawString(content, graphics.getFontMetrics().stringWidth(content),bufferImage.getHeight()/2);
+			graphics.dispose();//释放资源
+			return bufferImage;
+		} catch (IOException e) {
+			log.error(e.getMessage());
+			return null;
+		}
+	}
+	
+	public static void main(String[] args) {
+		try {
+			System.out.println("............");
+			String filePath = "D:\\mcgj\\myProject\\mcgjServer\\src\\main\\webapp\\resources\\home\\card_banner";
+			File file = new File(filePath);
+			if(!file.exists()){
+				throw new RuntimeException("横幅文件夹不存在");
+			}
+			//横幅图片数量
+			int imgCount = file.list().length;
+			if(file.list().length == 0){
+				throw new RuntimeException("横幅文件夹下没有图片");
+			}
+			int random = new Random().nextInt(imgCount);//随机一张图片
+			String imgName = file.list()[random];
+			file = new File(filePath + "\\" + imgName);
+			BufferedImage readImage = ImageIO.read(file);//读取文件流
+			BufferedImage bufferImage = new BufferedImage(readImage.getWidth(), readImage.getHeight(), BufferedImage.TYPE_INT_RGB);
+			Graphics graphics = bufferImage.getGraphics();//获取画笔
+			graphics.drawString("坂井泉水", 200, 300);
+			graphics.dispose();//释放资源
+			ImageIO.write(bufferImage, "test.jpg", new File("D:\\mcgj"));
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
 	}
 	
 }

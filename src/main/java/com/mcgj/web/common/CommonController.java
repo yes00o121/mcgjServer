@@ -140,4 +140,26 @@ public class CommonController extends AbstractBaseController{
 		}
 		return imgId;
 	}
+	
+	/**
+	 * 获取附带文本的卡片默认图片
+	 * @param content 文本内容
+	 */
+	@RequestMapping("/getCardWorkImage")
+	public void getCardWorkImage(String content,HttpServletRequest request,HttpServletResponse response){
+		try {
+			String filePath = request.getSession().getServletContext().getRealPath("\\resources\\home\\card_banner");
+			BufferedImage imageBuffer = new RandomGraphic().createWrodImage(content,filePath );
+			ImageIO.write(imageBuffer, "jpg", response.getOutputStream());
+		} catch (IOException e) {
+			log.error(e.getMessage());
+		}
+	}
+	public static void main(String[] args) {
+		new CommonController();
+	}
+	
+	public CommonController(){
+		System.out.println(getClass().getClassLoader().getResource("").getPath());;
+	}
 }

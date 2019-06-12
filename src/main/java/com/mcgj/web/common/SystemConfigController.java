@@ -21,4 +21,15 @@ public class SystemConfigController {
 	public String selectSystemConfigByKey(String key){
 		return SystemConfigUtil.getSystemConfigByKey(key);
 	}
+	
+	/**
+	 * 更新系统配置的缓存
+	 * @return
+	 */
+	@RequestMapping("/updateSystemConfigCache")
+	@ResponseBody
+	public int updateSystemConfigCache(){
+		SystemConfigUtil.reload();
+		return 1;
+	}
 }
