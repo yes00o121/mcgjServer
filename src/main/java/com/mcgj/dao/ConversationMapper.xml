@@ -35,15 +35,15 @@
 		RIGHT JOIN (
 				select *,count(conversation_child_id) as replyNUmber From (
 				select * From conversation_child_child
-				 order by create_date desc) ccc
-				group by ccc.conversation_child_id,ccc.conversation_child_id order by ccc.create_date desc
+				 order by create_date desc limit 10000000) ccc
+				group by ccc.conversation_child_id order by ccc.create_date desc
 			) ccc on ccc.conversation_child_id = cc.id
 			
 		LEFT JOIN user u on u.id = cc.user_id 
 		where c.state =1 and cc.state =1
 		group by ccc.id
 		order by ccc.create_date desc
-		limit 0,10
+		limit 0,40
 	</select>
 	<insert id="insert" parameterType="com.mcgj.entity.Conversation">
 		<selectKey resultType="java.lang.Integer" order="AFTER" keyProperty="id">
@@ -157,7 +157,7 @@
 		LEFT JOIN conversation_child cc on cc.conversation_id = c.id
 		LEFT JOIN user u on u.id = cc.user_id
 		LEFT JOIN conversation_child_child ccc on ccc.conversation_child_id = cc.id
-		order by ccc.create_date desc
+		order by ccc.create_date desc limit 1000000
 		) cc
 		where cc.id is not null
 		group by cc.id

@@ -64,10 +64,10 @@
 						conversation_child_child ccc
 					LEFT JOIN USER u ON u.id = ccc.user_id
 					ORDER BY
-						ccc.create_date DESC
+						ccc.create_date DESC limit 10000000
 				) ccc
 			GROUP BY
-				ccc.conversation_child_id
+				ccc.conversation_child_id order by ccc.create_date DESC
 		) ccc ON ccc.conversation_child_id = cc.id
 		<where>
 			cc.conversation_id = #{conversationId}
